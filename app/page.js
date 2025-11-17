@@ -3,21 +3,35 @@ import FooterAccordion from '@/components/FooterAccordion';
 import Image from 'next/image';
 
 async function getTasas() {
+
   try {
-    const res = await fetch('http://localhost:3000/api/tasas', { cache: 'no-store' });
+
+    // Detecta automáticamente el entorno
+
+    const baseURL = process.env.NEXT_PUBLIC_SITE_URL || 
+
+                    (process.env.NODE_ENV === 'production' 
+
+                      ? 'https://walletcambios.com' 
+
+                      : 'http://localhost:3000');
+
+    
+
+    const res = await fetch${baseURL}/api/tasas, { cache: 'no-store' });
+
+    
+
     if (!res.ok) throw new Error('Error');
+
     return res.json();
+
   } catch (error) {
-    return {
-      tasa_bs: 286.7,
-      tasa_usd_cop_compra: 3610,
-      tasa_cop_usd_venta: 4056,
-      tasa_bs_cop: 11.68,
-      tasa_cop_bs: 13.55,
-      tasa_clp_bs: 0.294,
-      tasa_clp_cop: 3.72,
-    };
+
+    // ... fallback
+
   }
+
 }
 
 export default async function Home() {
