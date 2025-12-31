@@ -55,10 +55,19 @@ export async function GET() {
     let tasa_cop_bs = null;
     let tasa_clp_bs = null;
     let tasa_clp_cop = null;
-    // Tasas de Paypal
     let tasa_pypl_cop = null;
     let tasa_pypl_bs = null;
     let tasa_cop_pypl = null;
+    
+    // Tasas USDT
+    let tasa_clp_usd = null;
+    let tasa_usdt_bs = null;
+    let tasa_usdt_cop = null;
+    let tasa_usdt_usd = null;
+    let tasa_bs_usdt = null;
+    let tasa_usd_usdt = null;
+    let tasa_cop_usdt = null;
+    let tasa_clp_usdt = null;
 
     // Buscar tasas por nombre en la columna A
     for (let i = 0; i < data2.length; i++) {
@@ -70,11 +79,19 @@ export async function GET() {
       if (nombre === 'cop/ves') tasa_cop_bs = limpiarValor(row[1]);
       if (nombre === 'clp/ves') tasa_clp_bs = limpiarValor(row[1]);
       if (nombre === 'clp/cop') tasa_clp_cop = limpiarValor(row[1]);
-      
-      // Tasas de Paypal (filas 29-31 en la sheet)
       if (nombre === 'paypal/cop') tasa_pypl_cop = limpiarValor(row[1]);
       if (nombre === 'paypal/bs') tasa_pypl_bs = limpiarValor(row[1]);
       if (nombre === 'cop/paypal') tasa_cop_pypl = limpiarValor(row[1]);
+      
+      // Tasas USDT
+      if (nombre === 'clp/usa' || nombre === 'clp/usd') tasa_clp_usd = limpiarValor(row[1]);
+      if (nombre === 'usdt/bs' || nombre === 'usdt/ves') tasa_usdt_bs = limpiarValor(row[1]);
+      if (nombre === 'usdt/cop') tasa_usdt_cop = limpiarValor(row[1]);
+      if (nombre === 'usdt/usd' || nombre === 'usdt/usa') tasa_usdt_usd = limpiarValor(row[1]);
+      if (nombre === 'bs/usdt' || nombre === 'ves/usdt') tasa_bs_usdt = limpiarValor(row[1]);
+      if (nombre === 'usd/usdt' || nombre === 'usa/usdt') tasa_usd_usdt = limpiarValor(row[1]);
+      if (nombre === 'cop/usdt') tasa_cop_usdt = limpiarValor(row[1]);
+      if (nombre === 'clp/usdt') tasa_clp_usdt = limpiarValor(row[1]);
     }
 
     // Objeto con todas las tasas
@@ -86,20 +103,24 @@ export async function GET() {
       tasa_cop_bs,
       tasa_clp_bs,
       tasa_clp_cop,
-      // Tasas de Paypal
       tasa_pypl_cop,
       tasa_pypl_bs,
-      tasa_cop_pypl
+      tasa_cop_pypl,
+      tasa_clp_usd,
+      tasa_usdt_bs,
+      tasa_usdt_cop,
+      tasa_usdt_usd,
+      tasa_bs_usdt,
+      tasa_usd_usdt,
+      tasa_cop_usdt,
+      tasa_clp_usdt
     };
-
-    console.log('Tasas cargadas:', tasas);
 
     return NextResponse.json(tasas);
     
   } catch (error) {
     console.error('Error cargando tasas:', error);
     
-    // Valores de fallback si falla la carga desde Google Sheets
     return NextResponse.json(
       { 
         tasa_bs: 286.7,
@@ -109,10 +130,17 @@ export async function GET() {
         tasa_cop_bs: 13.55,
         tasa_clp_bs: 0.294,
         tasa_clp_cop: 3.72,
-        // Valores por defecto de Paypal
         tasa_pypl_cop: 4200,
         tasa_pypl_bs: 320,
-        tasa_cop_pypl: 0.00024
+        tasa_cop_pypl: 0.00024,
+        tasa_clp_usd: 997.50,
+        tasa_usdt_bs: 498.20,
+        tasa_usdt_cop: 3496.00,
+        tasa_usdt_usd: 0.95,
+        tasa_bs_usdt: 555.50,
+        tasa_usd_usdt: 0.95,
+        tasa_cop_usdt: 3969.00,
+        tasa_clp_usdt: 997.50
       },
       { status: 500 }
     );

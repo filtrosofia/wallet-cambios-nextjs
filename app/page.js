@@ -16,6 +16,18 @@ async function getTasas() {
       tasa_cop_bs: 13.55,
       tasa_clp_bs: 0.294,
       tasa_clp_cop: 3.72,
+      tasa_pypl_cop: 4200,
+      tasa_pypl_bs: 320,
+      tasa_cop_pypl: 0.00024,
+      // Valores de fallback USDT
+      tasa_clp_usd: 997.50,
+      tasa_usdt_bs: 498.20,
+      tasa_usdt_cop: 3496.00,
+      tasa_usdt_usd: 0.95,
+      tasa_bs_usdt: 555.50,
+      tasa_usd_usdt: 0.95,
+      tasa_cop_usdt: 3969.00,
+      tasa_clp_usdt: 997.50
     };
   }
 }
@@ -46,7 +58,7 @@ export default async function Home() {
         {/* Horario */}
         <div className="bg-gradient-to-r from-[#FFC542]/25 to-[#F36B2D]/25 border-l-4 border-[#FFC542] rounded-xl p-6 mb-10 shadow-xl">
           <p className="text-white text-center font-bold text-[16px] sm:text-lg leading-snug">
-            | Lunes a Sábados 8:00 a.m. - 6:00 p.m. |
+            🕒 | Lunes a Sábados 8:00 a.m. - 6:00 p.m. |
             Domingos 12:00 m - 5:00 p.m.
           </p>
         </div>

@@ -13,11 +13,12 @@ const cleanDecimal = (v) => {
 
 /* ===== combinaciones válidas ===== */
 const COMBINACIONES_VALIDAS = {
-  USD: ['Bs', 'COP'],
-  COP: ['USD', 'Bs', 'PYPL'],
-  Bs: ['COP'],
-  CLP: ['Bs', 'COP'],
+  USD: ['Bs', 'COP', 'USDT'],
+  COP: ['USD', 'Bs', 'PYPL', 'USDT'],
+  Bs: ['COP', 'USDT'],
+  CLP: ['Bs', 'COP', 'USD', 'USDT'],
   PYPL: ['COP', 'Bs'],
+  USDT: ['USD', 'COP', 'Bs']
 };
 
 /* ===== etiquetas y banderas ===== */
@@ -27,6 +28,7 @@ const NOMBRES = {
   Bs: 'Bolívar venezolano',
   CLP: 'Peso chileno',
   PYPL: 'PayPal',
+  USDT: 'USDT'
 };
 
 const BANDERAS = {
@@ -35,6 +37,7 @@ const BANDERAS = {
   Bs: '/banderas/venezuela.png',
   CLP: '/banderas/chile.png',
   PYPL: '/banderas/paypal.png',
+  USDT: '/banderas/usdt.png'
 };
 
 /* ===== Dropdown de moneda (custom, sin <select>) ===== */
@@ -42,10 +45,8 @@ function CurrencyPill({ value, options, onChange }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
-  
 
   useEffect(() => {
-    // Detectar si es móvil
     const checkMobile = () => setIsMobile(window.innerWidth <= 430);
     checkMobile();
     window.addEventListener('resize', checkMobile);
@@ -62,7 +63,6 @@ function CurrencyPill({ value, options, onChange }) {
 
   return (
     <div ref={ref} className="relative" style={{ width: 'auto' }}>
-      {/* Botón - ajustado para que coincida con el input */}
       <button
         type="button"
         onClick={() => setOpen((s) => !s)}
@@ -110,7 +110,6 @@ function CurrencyPill({ value, options, onChange }) {
         }}>▾</span>
       </button>
 
-      {/* Menú dropdown - más compacto */}
       {open && (
         <div
           style={{
@@ -192,12 +191,13 @@ export default function CalculadoraUniversal({ tasas }) {
   const [monedaDestino, setMonedaDestino] = useState('COP');
   const [montoEnviar, setMontoEnviar] = useState('');
   const [montoRecibir, setMontoRecibir] = useState('');
-  const [mostrarAlerta, setMostrarAlerta] = useState(false); // Estado para la alerta
+  const [mostrarAlerta, setMostrarAlerta] = useState(false);
 
-  // === tasa actual ===
+  // === FUNCIÓN getTasa() - ACTUALIZADA CON USDT ===
   const getTasa = () => {
     const par = `${monedaOrigen}-${monedaDestino}`;
     const map = {
+      // Tasas existentes
       'USD-Bs': tasas.tasa_bs,
       'Bs-USD': 1 / tasas.tasa_bs,
       'USD-COP': tasas.tasa_usd_cop_compra,
@@ -211,12 +211,24 @@ export default function CalculadoraUniversal({ tasas }) {
       'PYPL-COP': tasas.tasa_pypl_cop,
       'PYPL-Bs': tasas.tasa_pypl_bs,
       'COP-PYPL': 1 / tasas.tasa_cop_pypl,
+      
+      // ===== NUEVAS TASAS USDT =====
+      'CLP-USD': 1 / tasas.tasa_clp_usd,
+      'USD-CLP': 1 / tasas.tasa_clp_usd,
+      'USDT-Bs': tasas.tasa_usdt_bs,
+      'Bs-USDT': 1 / tasas.tasa_bs_usdt,
+      'USDT-COP': tasas.tasa_usdt_cop,
+      'COP-USDT': 1 / tasas.tasa_cop_usdt,
+      'USDT-USD': tasas.tasa_usdt_usd,
+      'USD-USDT': tasas.tasa_usd_usdt,
+      'CLP-USDT': 1 / tasas.tasa_clp_usdt,
+      'USDT-CLP': 1 / tasas.tasa_clp_usdt
     };
     return map[par] || 1;
   };
+
   const tasa = getTasa();
 
-  // validar destino cuando cambia origen
   useEffect(() => {
     const valid = COMBINACIONES_VALIDAS[monedaOrigen] || [];
     if (!valid.includes(monedaDestino)) {
@@ -226,7 +238,6 @@ export default function CalculadoraUniversal({ tasas }) {
     }
   }, [monedaOrigen, monedaDestino]);
 
-  // === handlers con saneo + sincronización ===
   const handleEnviarChange = (raw) => {
     const v = cleanDecimal(raw);
     setMontoEnviar(v);
@@ -250,7 +261,6 @@ export default function CalculadoraUniversal({ tasas }) {
     return `https://wa.me/584146108166?text=${encodeURIComponent(msg)}`;
   };
 
-  // Manejar click en botón WhatsApp
   const handleWhatsAppClick = (e) => {
     if (monedaOrigen === 'PYPL') {
       e.preventDefault();
@@ -258,13 +268,12 @@ export default function CalculadoraUniversal({ tasas }) {
     }
   };
 
-  // Confirmar y enviar a WhatsApp
   const confirmarYEnviar = () => {
     setMostrarAlerta(false);
     window.open(crearEnlaceWhatsApp(), '_blank');
   };
 
-  const opcionesOrigen = ['USD', 'COP', 'Bs', 'CLP', 'PYPL'];
+  const opcionesOrigen = ['USD', 'COP', 'Bs', 'CLP', 'PYPL', 'USDT'];
   const opcionesDestino = COMBINACIONES_VALIDAS[monedaOrigen] || [];
 
   return (
@@ -272,10 +281,9 @@ export default function CalculadoraUniversal({ tasas }) {
       {/* ===== ENVIAR ===== */}
       <div className="space-y-3">
         <label className="text-white font-bold text-xl flex items-center gap-3">
-          <span></span> ¿Cuánto deseas enviar?
+          <span>📤</span> ¿Cuánto deseas enviar?
         </label>
 
-        {/* Flex para alinear pill + input en la misma línea */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <CurrencyPill
             value={monedaOrigen}
@@ -304,18 +312,19 @@ export default function CalculadoraUniversal({ tasas }) {
       <p className="text-center text-gray-400 text-lg">
         Tasa actual:{' '}
         <span className="text-[#F36B2D] font-bold text-2xl">
-          {tasa < 0.01 ? tasa.toFixed(6) : tasa.toFixed(2)}
-        </span>{' '}
-        {monedaOrigen}/{monedaDestino}
+          {tasa < 1 
+            ? `${(1/tasa).toFixed(2)} ${monedaDestino}/${monedaOrigen}`
+            : `${tasa.toFixed(2)} ${monedaOrigen}/${monedaDestino}`
+          }
+        </span>
       </p>
 
       {/* ===== RECIBIR ===== */}
       <div className="space-y-3">
         <label className="text-white font-bold text-xl flex items-center gap-2">
-          <span></span> El destinatario recibirá:
+          <span>📥</span> El destinatario recibirá:
         </label>
 
-        {/* Flex para alinear pill + input en la misma línea */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <CurrencyPill
             value={monedaDestino}
@@ -392,12 +401,10 @@ export default function CalculadoraUniversal({ tasas }) {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Ícono de advertencia */}
             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
               <span style={{ fontSize: '56px' }}>⚠️</span>
             </div>
 
-            {/* Título */}
             <h3 style={{ 
               color: '#F36B2D', 
               fontSize: '24px', 
@@ -409,7 +416,6 @@ export default function CalculadoraUniversal({ tasas }) {
               Advertencia: Pago con PayPal
             </h3>
 
-            {/* Mensaje */}
             <p style={{ 
               color: '#fff', 
               fontSize: '17px', 
@@ -430,7 +436,6 @@ export default function CalculadoraUniversal({ tasas }) {
               ¿Desea continuar?
             </p>
 
-            {/* Botones */}
             <div style={{ 
               display: 'flex', 
               gap: '12px',
