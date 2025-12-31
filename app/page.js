@@ -1,22 +1,21 @@
 import CalculadoraUniversal from '@/components/CalculadoraUniversal';
 import FooterAccordion from '@/components/FooterAccordion';
 import Image from 'next/image';
+import { GET as getTasasAPI } from '@/app/api/tasas/route';
 
 async function getTasas() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/tasas`, { 
-      cache: 'no-store',
-      headers: { 'Cache-Control': 'no-cache' }
-    });
-    if (!res.ok) throw new Error('Error');
-    return res.json();
+    // Llamar directamente al API route sin HTTP fetch
+    const response = await getTasasAPI();
+    const tasas = await response.json();
+    return tasas;
   } catch (error) {
     console.error('[PAGE] Error cargando tasas, usando fallback:', error);
     // Valores actualizados desde el Sheet (31 Dic 2024) - CORREGIDOS
     return {
-      tasa_bs: 521.7,
-      tasa_usd_cop_compra: 3496,
-      tasa_cop_usd_venta: 3948,
+      tasa_bs: 286.7,
+      tasa_usd_cop_compra: 3610,
+      tasa_cop_usd_venta: 4056,
       tasa_bs_cop: 5.83,
       tasa_cop_bs: 7.18,
       tasa_clp_bs: 0.546,
