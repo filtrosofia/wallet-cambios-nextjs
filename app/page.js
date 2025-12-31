@@ -4,7 +4,7 @@ import Image from 'next/image';
 
 async function getTasas() {
   try {
-    const res = await fetch('http://localhost:3000/api/tasas', { 
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/tasas`, { 
       cache: 'no-store',
       headers: { 'Cache-Control': 'no-cache' }
     });

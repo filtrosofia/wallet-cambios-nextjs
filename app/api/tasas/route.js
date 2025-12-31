@@ -56,6 +56,16 @@ export async function GET() {
     const tasa_usd_cop_compra = limpiarValor(data1[3]?.[12]); // M4
     const tasa_cop_usd_venta = limpiarValor(data1[3]?.[13]); // N4
 
+    // 🔍 DEBUG: Ver qué está leyendo de la primera hoja
+    console.log('=== HOJA TASAS COL-VEN ===');
+    console.log('Fila 1 (índice 0):', data1[0]?.slice(10, 15));
+    console.log('Fila 2 (índice 1) VENEZUELA:', data1[1]?.slice(10, 15));
+    console.log('Fila 4 (índice 3) COLOMBIA:', data1[3]?.slice(10, 15));
+    console.log('---');
+    console.log(`tasa_bs (data1[1][12]): "${data1[1]?.[12]}" → ${tasa_bs}`);
+    console.log(`tasa_usd_cop_compra (data1[3][12]): "${data1[3]?.[12]}" → ${tasa_usd_cop_compra}`);
+    console.log(`tasa_cop_usd_venta (data1[3][13]): "${data1[3]?.[13]}" → ${tasa_cop_usd_venta}`);
+
     // ========== CARGAR SEGUNDA HOJA (TASAS AL MAYOR) ==========
     const response2 = await fetch(sheetUrlTasasMayor, {
       cache: 'no-store',
@@ -92,23 +102,29 @@ export async function GET() {
     // Buscar tasas por nombre en la columna A
     for (let i = 0; i < data2.length; i++) {
       const row = data2[i];
-      const nombre = row[0]?.replace(/"/g, '').trim().toLowerCase();
+      const nombreRaw = row[0]?.replace(/"/g, '').trim();
+      const nombre = nombreRaw.toLowerCase().replace(/\s+/g, '');
+      
+      // Log para debugging (temporal)
+      if (nombre.includes('usdt') || nombre.includes('cop') || nombre.includes('bs')) {
+        console.log(`[TASAS] Fila ${i}: "${nombreRaw}" → "${nombre}" = ${row[1]}`);
+      }
       
       // Tasas existentes
-      if (nombre === 've/cop') tasa_bs_cop = limpiarValor(row[1]);
-      if (nombre === 'cop/ves') tasa_cop_bs = limpiarValor(row[1]);
-      if (nombre === 'clp/ves') tasa_clp_bs = limpiarValor(row[1]);
+      if (nombre === 've/cop' || nombre === 'ves/cop') tasa_bs_cop = limpiarValor(row[1]);
+      if (nombre === 'cop/ves' || nombre === 'cop/ve') tasa_cop_bs = limpiarValor(row[1]);
+      if (nombre === 'clp/ves' || nombre === 'clp/ve') tasa_clp_bs = limpiarValor(row[1]);
       if (nombre === 'clp/cop') tasa_clp_cop = limpiarValor(row[1]);
       if (nombre === 'paypal/cop') tasa_pypl_cop = limpiarValor(row[1]);
-      if (nombre === 'paypal/bs') tasa_pypl_bs = limpiarValor(row[1]);
+      if (nombre === 'paypal/bs' || nombre === 'paypal/ves') tasa_pypl_bs = limpiarValor(row[1]);
       if (nombre === 'cop/paypal') tasa_cop_pypl = limpiarValor(row[1]);
       
-      // Tasas USDT
+      // Tasas USDT - agregando más variantes
       if (nombre === 'clp/usa' || nombre === 'clp/usd') tasa_clp_usd = limpiarValor(row[1]);
-      if (nombre === 'usdt/bs' || nombre === 'usdt/ves') tasa_usdt_bs = limpiarValor(row[1]);
+      if (nombre === 'usdt/bs' || nombre === 'usdt/ves' || nombre === 'usdt/ve') tasa_usdt_bs = limpiarValor(row[1]);
       if (nombre === 'usdt/cop') tasa_usdt_cop = limpiarValor(row[1]);
       if (nombre === 'usdt/usd' || nombre === 'usdt/usa') tasa_usdt_usd = limpiarValor(row[1]);
-      if (nombre === 'bs/usdt' || nombre === 'ves/usdt') tasa_bs_usdt = limpiarValor(row[1]);
+      if (nombre === 'bs/usdt' || nombre === 'ves/usdt' || nombre === 've/usdt') tasa_bs_usdt = limpiarValor(row[1]);
       if (nombre === 'usd/usdt' || nombre === 'usa/usdt') tasa_usd_usdt = limpiarValor(row[1]);
       if (nombre === 'cop/usdt') tasa_cop_usdt = limpiarValor(row[1]);
       if (nombre === 'clp/usdt') tasa_clp_usdt = limpiarValor(row[1]);
@@ -150,26 +166,26 @@ export async function GET() {
     console.error('[TASAS API] ❌ ERROR al cargar tasas:', error);
     console.error('[TASAS API] Usando valores de fallback actualizados');
     
-    // Valores actualizados desde el Sheet (31 Dic 2024)
+    // Valores actualizados desde el Sheet (31 Dic 2024) - CORREGIDOS
     return NextResponse.json(
       { 
         tasa_bs: 286.7,
         tasa_usd_cop_compra: 3610,
         tasa_cop_usd_venta: 4056,
-        tasa_bs_cop: 5.83,       // Actualizado
-        tasa_cop_bs: 7.18,       // Actualizado
-        tasa_clp_bs: 0.546,      // Actualizado
-        tasa_clp_cop: 3.68,      // Actualizado
-        tasa_pypl_cop: 3312.00,  // Actualizado
-        tasa_pypl_bs: 493.95,    // Actualizado
-        tasa_cop_pypl: 3948.00,  // Actualizado
+        tasa_bs_cop: 5.83,
+        tasa_cop_bs: 7.18,
+        tasa_clp_bs: 0.546,
+        tasa_clp_cop: 3.68,
+        tasa_pypl_cop: 3312.00,
+        tasa_pypl_bs: 493.95,
+        tasa_cop_pypl: 3948.00,
         tasa_clp_usd: 997.50,
-        tasa_usdt_bs: 521.70,    // Actualizado
-        tasa_usdt_cop: 3496.00,  // Actualizado
+        tasa_usdt_bs: 521.70,
+        tasa_usdt_cop: 3496.00,
         tasa_usdt_usd: 0.95,
-        tasa_bs_usdt: 555.50,
+        tasa_bs_usdt: 606.00,     // CORREGIDO: era 555.50
         tasa_usd_usdt: 0.95,
-        tasa_cop_usdt: 3969.00,
+        tasa_cop_usdt: 3948.00,   // CORREGIDO: era 3969.00
         tasa_clp_usdt: 997.50
       },
       { 
