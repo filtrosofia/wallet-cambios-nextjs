@@ -4,24 +4,28 @@ import Image from 'next/image';
 
 async function getTasas() {
   try {
-    const res = await fetch('http://localhost:3000/api/tasas', { cache: 'no-store' });
+    const res = await fetch('http://localhost:3000/api/tasas', { 
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' }
+    });
     if (!res.ok) throw new Error('Error');
     return res.json();
   } catch (error) {
+    console.error('[PAGE] Error cargando tasas, usando fallback:', error);
+    // Valores actualizados desde el Sheet (31 Dic 2024)
     return {
       tasa_bs: 286.7,
       tasa_usd_cop_compra: 3610,
       tasa_cop_usd_venta: 4056,
-      tasa_bs_cop: 11.68,
-      tasa_cop_bs: 13.55,
-      tasa_clp_bs: 0.294,
-      tasa_clp_cop: 3.72,
-      tasa_pypl_cop: 4200,
-      tasa_pypl_bs: 320,
-      tasa_cop_pypl: 0.00024,
-      // Valores de fallback USDT
+      tasa_bs_cop: 5.83,
+      tasa_cop_bs: 7.18,
+      tasa_clp_bs: 0.546,
+      tasa_clp_cop: 3.68,
+      tasa_pypl_cop: 3312.00,
+      tasa_pypl_bs: 493.95,
+      tasa_cop_pypl: 3948.00,
       tasa_clp_usd: 997.50,
-      tasa_usdt_bs: 498.20,
+      tasa_usdt_bs: 521.70,
       tasa_usdt_cop: 3496.00,
       tasa_usdt_usd: 0.95,
       tasa_bs_usdt: 555.50,

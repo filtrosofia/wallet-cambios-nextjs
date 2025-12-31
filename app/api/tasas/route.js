@@ -5,6 +5,8 @@ export async function GET() {
     const sheetUrl = "https://docs.google.com/spreadsheets/d/1ig4ihkUIeP7kaaR6yZeyOLF7j38Y_peytGKG6tgkqbw/gviz/tq?tqx=out:csv&sheet=TASAS%20COL%20-%20VEN";
     const sheetUrlTasasMayor = "https://docs.google.com/spreadsheets/d/1ig4ihkUIeP7kaaR6yZeyOLF7j38Y_peytGKG6tgkqbw/gviz/tq?tqx=out:csv&sheet=Tasas%20al%20mayor";
 
+    console.log('[TASAS API] Iniciando fetch desde Google Sheets...');
+
     // Función para parsear CSV
     const parseCSV = (text) => {
       const lines = text.split('\n');
@@ -37,18 +39,36 @@ export async function GET() {
     };
 
     // ========== CARGAR PRIMERA HOJA (TASAS COL-VEN) ==========
-    const response1 = await fetch(sheetUrl);
+    const response1 = await fetch(sheetUrl, {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' }
+    });
+    
+    if (!response1.ok) {
+      throw new Error(`HTTP error! status: ${response1.status}`);
+    }
+    
     const csv1 = await response1.text();
     const data1 = parseCSV(csv1);
+    console.log('[TASAS API] ✓ Primera hoja cargada correctamente');
 
     const tasa_bs = limpiarValor(data1[1]?.[12]); // M2
     const tasa_usd_cop_compra = limpiarValor(data1[3]?.[12]); // M4
     const tasa_cop_usd_venta = limpiarValor(data1[3]?.[13]); // N4
 
     // ========== CARGAR SEGUNDA HOJA (TASAS AL MAYOR) ==========
-    const response2 = await fetch(sheetUrlTasasMayor);
+    const response2 = await fetch(sheetUrlTasasMayor, {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' }
+    });
+    
+    if (!response2.ok) {
+      throw new Error(`HTTP error! status: ${response2.status}`);
+    }
+    
     const csv2 = await response2.text();
     const data2 = parseCSV(csv2);
+    console.log('[TASAS API] ✓ Segunda hoja cargada correctamente');
 
     // Inicializar todas las tasas
     let tasa_bs_cop = null;
@@ -116,35 +136,54 @@ export async function GET() {
       tasa_clp_usdt
     };
 
-    return NextResponse.json(tasas);
+    console.log('[TASAS API] ✓ Tasas cargadas exitosamente desde Google Sheets');
+    
+    return NextResponse.json(tasas, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    });
     
   } catch (error) {
-    console.error('Error cargando tasas:', error);
+    console.error('[TASAS API] ❌ ERROR al cargar tasas:', error);
+    console.error('[TASAS API] Usando valores de fallback actualizados');
     
+    // Valores actualizados desde el Sheet (31 Dic 2024)
     return NextResponse.json(
       { 
         tasa_bs: 286.7,
         tasa_usd_cop_compra: 3610,
         tasa_cop_usd_venta: 4056,
-        tasa_bs_cop: 11.68,
-        tasa_cop_bs: 13.55,
-        tasa_clp_bs: 0.294,
-        tasa_clp_cop: 3.72,
-        tasa_pypl_cop: 4200,
-        tasa_pypl_bs: 320,
-        tasa_cop_pypl: 0.00024,
+        tasa_bs_cop: 5.83,       // Actualizado
+        tasa_cop_bs: 7.18,       // Actualizado
+        tasa_clp_bs: 0.546,      // Actualizado
+        tasa_clp_cop: 3.68,      // Actualizado
+        tasa_pypl_cop: 3312.00,  // Actualizado
+        tasa_pypl_bs: 493.95,    // Actualizado
+        tasa_cop_pypl: 3948.00,  // Actualizado
         tasa_clp_usd: 997.50,
-        tasa_usdt_bs: 498.20,
-        tasa_usdt_cop: 3496.00,
+        tasa_usdt_bs: 521.70,    // Actualizado
+        tasa_usdt_cop: 3496.00,  // Actualizado
         tasa_usdt_usd: 0.95,
         tasa_bs_usdt: 555.50,
         tasa_usd_usdt: 0.95,
         tasa_cop_usdt: 3969.00,
         tasa_clp_usdt: 997.50
       },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      }
     );
   }
 }
 
-export const revalidate = 300;
+// Revalidar cada request (sin cache)
+export const revalidate = 0;
+export const dynamic = 'force-dynamic';
