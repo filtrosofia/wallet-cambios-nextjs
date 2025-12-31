@@ -12,7 +12,7 @@ async function getTasas() {
     return res.json();
   } catch (error) {
     console.error('[PAGE] Error cargando tasas, usando fallback:', error);
-    // Valores actualizados desde el Sheet (31 Dic 2024)
+    // Valores actualizados desde el Sheet (31 Dic 2024) - CORREGIDOS
     return {
       tasa_bs: 286.7,
       tasa_usd_cop_compra: 3610,
@@ -28,9 +28,9 @@ async function getTasas() {
       tasa_usdt_bs: 521.70,
       tasa_usdt_cop: 3496.00,
       tasa_usdt_usd: 0.95,
-      tasa_bs_usdt: 555.50,
+      tasa_bs_usdt: 606.00,     // CORREGIDO
       tasa_usd_usdt: 0.95,
-      tasa_cop_usdt: 3969.00,
+      tasa_cop_usdt: 3948.00,   // CORREGIDO
       tasa_clp_usdt: 997.50
     };
   }
