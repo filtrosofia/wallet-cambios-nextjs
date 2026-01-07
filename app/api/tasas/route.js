@@ -5,8 +5,6 @@ export async function GET() {
     const sheetUrl = "https://docs.google.com/spreadsheets/d/1ig4ihkUIeP7kaaR6yZeyOLF7j38Y_peytGKG6tgkqbw/gviz/tq?tqx=out:csv&sheet=TASAS%20COL%20-%20VEN";
     const sheetUrlTasasMayor = "https://docs.google.com/spreadsheets/d/1ig4ihkUIeP7kaaR6yZeyOLF7j38Y_peytGKG6tgkqbw/gviz/tq?tqx=out:csv&sheet=Tasas%20al%20mayor";
 
-    console.log('[TASAS API] Iniciando fetch desde Google Sheets...');
-
     // Función para parsear CSV
     const parseCSV = (text) => {
       const lines = text.split('\n');
@@ -50,21 +48,10 @@ export async function GET() {
     
     const csv1 = await response1.text();
     const data1 = parseCSV(csv1);
-    console.log('[TASAS API] ✓ Primera hoja cargada correctamente');
 
     const tasa_bs = limpiarValor(data1[1]?.[12]); // M2
     const tasa_usd_cop_compra = limpiarValor(data1[3]?.[12]); // M4
     const tasa_cop_usd_venta = limpiarValor(data1[3]?.[13]); // N4
-
-    // 🔍 DEBUG: Ver qué está leyendo de la primera hoja
-    console.log('=== HOJA TASAS COL-VEN ===');
-    console.log('Fila 1 (índice 0):', data1[0]?.slice(10, 15));
-    console.log('Fila 2 (índice 1) VENEZUELA:', data1[1]?.slice(10, 15));
-    console.log('Fila 4 (índice 3) COLOMBIA:', data1[3]?.slice(10, 15));
-    console.log('---');
-    console.log(`tasa_bs (data1[1][12]): "${data1[1]?.[12]}" → ${tasa_bs}`);
-    console.log(`tasa_usd_cop_compra (data1[3][12]): "${data1[3]?.[12]}" → ${tasa_usd_cop_compra}`);
-    console.log(`tasa_cop_usd_venta (data1[3][13]): "${data1[3]?.[13]}" → ${tasa_cop_usd_venta}`);
 
     // ========== CARGAR SEGUNDA HOJA (TASAS AL MAYOR) ==========
     const response2 = await fetch(sheetUrlTasasMayor, {
@@ -78,7 +65,6 @@ export async function GET() {
     
     const csv2 = await response2.text();
     const data2 = parseCSV(csv2);
-    console.log('[TASAS API] ✓ Segunda hoja cargada correctamente');
 
     // Inicializar todas las tasas
     let tasa_bs_cop = null;
@@ -104,11 +90,6 @@ export async function GET() {
       const row = data2[i];
       const nombreRaw = row[0]?.replace(/"/g, '').trim();
       const nombre = nombreRaw.toLowerCase().replace(/\s+/g, '');
-      
-      // Log para debugging (temporal)
-      if (nombre.includes('usdt') || nombre.includes('cop') || nombre.includes('bs')) {
-        console.log(`[TASAS] Fila ${i}: "${nombreRaw}" → "${nombre}" = ${row[1]}`);
-      }
       
       // Tasas existentes
       if (nombre === 've/cop' || nombre === 'ves/cop') tasa_bs_cop = limpiarValor(row[1]);
@@ -152,8 +133,6 @@ export async function GET() {
       tasa_clp_usdt
     };
 
-    console.log('[TASAS API] ✓ Tasas cargadas exitosamente desde Google Sheets');
-    
     return NextResponse.json(tasas, {
       headers: {
         'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
@@ -163,15 +142,14 @@ export async function GET() {
     });
     
   } catch (error) {
-    console.error('[TASAS API] ❌ ERROR al cargar tasas:', error);
-    console.error('[TASAS API] Usando valores de fallback actualizados');
+    console.error('[TASAS API] Error:', error.message);
     
     // Valores actualizados desde el Sheet (31 Dic 2024) - CORREGIDOS
     return NextResponse.json(
       { 
-        tasa_bs: 521.7,
-        tasa_usd_cop_compra: 3496,
-        tasa_cop_usd_venta: 3948,
+        tasa_bs: 286.7,
+        tasa_usd_cop_compra: 3610,
+        tasa_cop_usd_venta: 4056,
         tasa_bs_cop: 5.83,
         tasa_cop_bs: 7.18,
         tasa_clp_bs: 0.546,
