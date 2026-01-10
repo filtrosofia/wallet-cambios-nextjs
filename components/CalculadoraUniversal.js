@@ -313,7 +313,7 @@ export default function CalculadoraUniversal({ tasas }) {
         Tasa actual:{' '}
         <span className="text-[#F36B2D] font-bold text-2xl">
           {tasa < 1 
-            ? `${(1/tasa).toFixed(2)} ${monedaDestino}/${monedaOrigen}`
+            ? `${(1/tasa).toFixed(2)} ${monedaOrigen}/${monedaDestino}`
             : `${tasa.toFixed(2)} ${monedaOrigen}/${monedaDestino}`
           }
         </span>
